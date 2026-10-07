@@ -1,0 +1,296 @@
+[
+    {
+        "Id": "465b4455fb190ffb360c143469c7b5ffdd1334c7f2fb73dcd8402ab46b276516",
+        "Created": "2026-10-07T00:33:03.01726418Z",
+        "Path": "/bin/bash",
+        "Args": [
+            "/opt/orin-scripts/build.sh",
+            "smoke-kernel"
+        ],
+        "State": {
+            "Status": "exited",
+            "Running": false,
+            "Paused": false,
+            "Restarting": false,
+            "OOMKilled": false,
+            "Dead": false,
+            "Pid": 0,
+            "ExitCode": 0,
+            "Error": "",
+            "StartedAt": "2026-10-07T00:33:03.32055457Z",
+            "FinishedAt": "2026-10-07T01:41:58.577514959Z"
+        },
+        "Image": "sha256:800ce884a8d42637ea6c6aae7e0824b580d9f6387a05dcc73f973fd17ad2c764",
+        "ResolvConfPath": "/var/lib/docker/containers/465b4455fb190ffb360c143469c7b5ffdd1334c7f2fb73dcd8402ab46b276516/resolv.conf",
+        "HostnamePath": "/var/lib/docker/containers/465b4455fb190ffb360c143469c7b5ffdd1334c7f2fb73dcd8402ab46b276516/hostname",
+        "HostsPath": "/var/lib/docker/containers/465b4455fb190ffb360c143469c7b5ffdd1334c7f2fb73dcd8402ab46b276516/hosts",
+        "LogPath": "/var/lib/docker/containers/465b4455fb190ffb360c143469c7b5ffdd1334c7f2fb73dcd8402ab46b276516/465b4455fb190ffb360c143469c7b5ffdd1334c7f2fb73dcd8402ab46b276516-json.log",
+        "Name": "/orin-qdma-dev-p3768-0000-p3767-0000-smoke-kernel-14be14d390e1",
+        "RestartCount": 0,
+        "Driver": "overlayfs",
+        "Platform": "linux",
+        "MountLabel": "",
+        "ProcessLabel": "",
+        "AppArmorProfile": "",
+        "ExecIDs": null,
+        "HostConfig": {
+            "Binds": [
+                "/Volumes/Zeus/workspace/orin-qdma-dev/artifacts:/artifacts:rw",
+                "orin-qdma-dev_workspace:/home/yocto/orin:rw",
+                "orin-qdma-dev_downloads:/home/yocto/orin/downloads:rw",
+                "orin-qdma-dev_sstate-cache:/home/yocto/orin/sstate-cache:rw",
+                "/Volumes/Zeus/workspace/orin-qdma-dev/scripts:/opt/orin-scripts:ro",
+                "/Volumes/Zeus/workspace/orin-qdma-dev/config:/opt/orin-config:ro",
+                "/Volumes/Zeus/workspace/orin-qdma-dev/layers:/opt/orin-layers:ro"
+            ],
+            "ContainerIDFile": "",
+            "LogConfig": {
+                "Type": "json-file",
+                "Config": {
+                    "max-file": "5",
+                    "max-size": "20m"
+                }
+            },
+            "NetworkMode": "orin-qdma-dev_default",
+            "PortBindings": {},
+            "RestartPolicy": {
+                "Name": "no",
+                "MaximumRetryCount": 0
+            },
+            "AutoRemove": false,
+            "VolumeDriver": "",
+            "VolumesFrom": null,
+            "ConsoleSize": [
+                0,
+                0
+            ],
+            "CapAdd": null,
+            "CapDrop": [
+                "ALL"
+            ],
+            "CgroupnsMode": "private",
+            "Dns": null,
+            "DnsOptions": null,
+            "DnsSearch": null,
+            "ExtraHosts": [],
+            "GroupAdd": null,
+            "IpcMode": "private",
+            "Cgroup": "",
+            "Links": null,
+            "OomScoreAdj": 0,
+            "PidMode": "",
+            "Privileged": false,
+            "PublishAllPorts": false,
+            "ReadonlyRootfs": false,
+            "SecurityOpt": [
+                "no-new-privileges:true"
+            ],
+            "UTSMode": "",
+            "UsernsMode": "",
+            "ShmSize": 8408530944,
+            "Runtime": "runc",
+            "Isolation": "",
+            "CpuShares": 0,
+            "Memory": 10737418240,
+            "NanoCpus": 4000000000,
+            "CgroupParent": "",
+            "BlkioWeight": 0,
+            "BlkioWeightDevice": null,
+            "BlkioDeviceReadBps": null,
+            "BlkioDeviceWriteBps": null,
+            "BlkioDeviceReadIOps": null,
+            "BlkioDeviceWriteIOps": null,
+            "CpuPeriod": 0,
+            "CpuQuota": 0,
+            "CpuRealtimePeriod": 0,
+            "CpuRealtimeRuntime": 0,
+            "CpusetCpus": "",
+            "CpusetMems": "",
+            "Devices": null,
+            "DeviceCgroupRules": null,
+            "DeviceRequests": null,
+            "MemoryReservation": 0,
+            "MemorySwap": 21474836480,
+            "MemorySwappiness": null,
+            "OomKillDisable": null,
+            "PidsLimit": null,
+            "Ulimits": null,
+            "CpuCount": 0,
+            "CpuPercent": 0,
+            "IOMaximumIOps": 0,
+            "IOMaximumBandwidth": 0,
+            "MaskedPaths": [
+                "/proc/acpi",
+                "/proc/asound",
+                "/proc/interrupts",
+                "/proc/kcore",
+                "/proc/keys",
+                "/proc/latency_stats",
+                "/proc/sched_debug",
+                "/proc/scsi",
+                "/proc/timer_list",
+                "/proc/timer_stats",
+                "/sys/devices/virtual/powercap",
+                "/sys/firmware"
+            ],
+            "ReadonlyPaths": [
+                "/proc/bus",
+                "/proc/fs",
+                "/proc/irq",
+                "/proc/sys",
+                "/proc/sysrq-trigger"
+            ],
+            "Init": true
+        },
+        "Storage": {
+            "RootFS": {
+                "Snapshot": {
+                    "Name": "overlayfs"
+                }
+            }
+        },
+        "Mounts": [
+            {
+                "Type": "bind",
+                "Source": "/Volumes/Zeus/workspace/orin-qdma-dev/layers",
+                "Destination": "/opt/orin-layers",
+                "Mode": "ro",
+                "RW": false,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/Volumes/Zeus/workspace/orin-qdma-dev/artifacts",
+                "Destination": "/artifacts",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "volume",
+                "Name": "orin-qdma-dev_workspace",
+                "Source": "/var/lib/docker/volumes/orin-qdma-dev_workspace/_data",
+                "Destination": "/home/yocto/orin",
+                "Driver": "local",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": ""
+            },
+            {
+                "Type": "volume",
+                "Name": "orin-qdma-dev_downloads",
+                "Source": "/var/lib/docker/volumes/orin-qdma-dev_downloads/_data",
+                "Destination": "/home/yocto/orin/downloads",
+                "Driver": "local",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": ""
+            },
+            {
+                "Type": "volume",
+                "Name": "orin-qdma-dev_sstate-cache",
+                "Source": "/var/lib/docker/volumes/orin-qdma-dev_sstate-cache/_data",
+                "Destination": "/home/yocto/orin/sstate-cache",
+                "Driver": "local",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": ""
+            },
+            {
+                "Type": "bind",
+                "Source": "/Volumes/Zeus/workspace/orin-qdma-dev/scripts",
+                "Destination": "/opt/orin-scripts",
+                "Mode": "ro",
+                "RW": false,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/Volumes/Zeus/workspace/orin-qdma-dev/config",
+                "Destination": "/opt/orin-config",
+                "Mode": "ro",
+                "RW": false,
+                "Propagation": "rprivate"
+            }
+        ],
+        "Config": {
+            "Hostname": "465b4455fb19",
+            "Domainname": "",
+            "User": "1000:1000",
+            "AttachStdin": true,
+            "AttachStdout": true,
+            "AttachStderr": true,
+            "Tty": false,
+            "OpenStdin": true,
+            "StdinOnce": true,
+            "Env": [
+                "ORIN_MACHINE=p3768-0000-p3767-0000",
+                "GIT_CONFIG_GLOBAL=/home/yocto/orin/gitconfig",
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "LANG=en_US.UTF-8",
+                "LC_ALL=en_US.UTF-8"
+            ],
+            "Cmd": [
+                "/opt/orin-scripts/build.sh",
+                "smoke-kernel"
+            ],
+            "Image": "orin-qdma-dev:ubuntu2404-wrynose-r39.2.1",
+            "Volumes": null,
+            "WorkingDir": "/home/yocto/orin",
+            "Entrypoint": [
+                "/bin/bash"
+            ],
+            "Labels": {
+                "com.docker.compose.config-hash": "0aceda0aff3621442c0ca772e90432cbaadf668c429b70c408fa3e19cde0c88a",
+                "com.docker.compose.depends_on": "",
+                "com.docker.compose.image": "sha256:800ce884a8d42637ea6c6aae7e0824b580d9f6387a05dcc73f973fd17ad2c764",
+                "com.docker.compose.oneoff": "True",
+                "com.docker.compose.project": "orin-qdma-dev",
+                "com.docker.compose.project.config_files": "/Volumes/Zeus/workspace/orin-qdma-dev/compose.yaml",
+                "com.docker.compose.project.working_dir": "/Volumes/Zeus/workspace/orin-qdma-dev",
+                "com.docker.compose.service": "shell",
+                "com.docker.compose.slug": "e05c48d1bc9201cd940f2a62267f746283725b0958242ade585ef536c2e68576",
+                "com.docker.compose.version": "5.1.2",
+                "org.opencontainers.image.version": "24.04"
+            }
+        },
+        "NetworkSettings": {
+            "SandboxID": "",
+            "SandboxKey": "",
+            "Ports": {},
+            "Networks": {
+                "orin-qdma-dev_default": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": [
+                        "orin-qdma-dev-p3768-0000-p3767-0000-smoke-kernel-14be14d390e1"
+                    ],
+                    "DriverOpts": null,
+                    "GwPriority": 0,
+                    "NetworkID": "5d332863e8ce031195d6871e21dfa81311a4e3eafe6d273ccb015727db9cecfd",
+                    "EndpointID": "",
+                    "Gateway": "",
+                    "IPAddress": "",
+                    "MacAddress": "",
+                    "IPPrefixLen": 0,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": [
+                        "orin-qdma-dev-p3768-0000-p3767-0000-smoke-kernel-14be14d390e1",
+                        "465b4455fb19"
+                    ]
+                }
+            }
+        },
+        "ImageManifestDescriptor": {
+            "mediaType": "application/vnd.oci.image.manifest.v1+json",
+            "digest": "sha256:fda688a4fc749d5a62c6d7db82a6e8a08931813b7179d65448dcdbd38d31d10d",
+            "size": 864,
+            "platform": {
+                "architecture": "amd64",
+                "os": "linux"
+            }
+        }
+    }
+]

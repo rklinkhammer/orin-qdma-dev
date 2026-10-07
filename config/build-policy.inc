@@ -1,0 +1,16 @@
+SDKMACHINE = "x86_64"
+DL_DIR = "/home/yocto/orin/downloads"
+SSTATE_DIR = "/home/yocto/orin/sstate-cache"
+SSTATE_MIRRORS = ""
+BB_HASHSERVE_UPSTREAM = ""
+BB_HASHSERVE_DB_DIR = "${SSTATE_DIR}"
+BB_NUMBER_THREADS = "2"
+BB_NUMBER_PARSE_THREADS = "2"
+PARALLEL_MAKE = "-j4"
+BB_DISKMON_DIRS = "STOPTASKS,${TMPDIR},25G,100K STOPTASKS,${DL_DIR},25G,100K HALT,${TMPDIR},15G,50K HALT,${DL_DIR},15G,50K"
+# No implicit codec or proprietary-license acceptance.
+LICENSE_FLAGS_ACCEPTED = ""
+# Focused host compilation must not fetch NVIDIA proprietary BSP/deploy packages.
+INCOMPATIBLE_LICENSE = "Proprietary"
+INCOMPATIBLE_LICENSE:class-native = "Proprietary"
+INCOMPATIBLE_LICENSE:class-nativesdk = "Proprietary"

@@ -1,0 +1,23 @@
+{
+  "verified_at_utc": "2026-10-07T04:42:39.807663+00:00",
+  "tools_build": {
+    "exit_code": 0,
+    "tasks": 1054,
+    "reused": 104,
+    "package_qa": "passed",
+    "help_only_startups": 6
+  },
+  "driver_build": {
+    "launcher_exit_code": 0,
+    "tasks": 903,
+    "reused": 895,
+    "compile_modpost_staged_install": "passed"
+  },
+  "export": {
+    "launcher_exit_code": 0,
+    "checksum_command": "shasum -a 256 -c SHA256SUMS",
+    "checksum_exit_code": 0
+  },
+  "hardware_tests": "unrun",
+  "proprietary_packaging_deployment": "unapproved, unrun"
+}

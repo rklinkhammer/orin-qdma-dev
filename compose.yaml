@@ -1,0 +1,41 @@
+name: orin-qdma-dev
+x-common: &common
+  image: orin-qdma-dev:ubuntu2404-wrynose-r39.2.1
+  pull_policy: never
+  platform: linux/amd64
+  working_dir: /home/yocto/orin
+  volumes:
+    - workspace:/home/yocto/orin
+    - downloads:/home/yocto/orin/downloads
+    - sstate-cache:/home/yocto/orin/sstate-cache
+    - ./scripts:/opt/orin-scripts:ro
+    - ./config:/opt/orin-config:ro
+    - ./layers:/opt/orin-layers:ro
+    - ./artifacts:/artifacts
+  security_opt: [no-new-privileges:true]
+  cap_drop: [ALL]
+services:
+  init:
+    <<: *common
+    user: "0:0"
+    cap_add: [CHOWN]
+    entrypoint: ["/bin/bash", "-ec"]
+    command: ['chown 1000:1000 /home/yocto/orin /home/yocto/orin/downloads /home/yocto/orin/sstate-cache']
+  shell:
+    <<: *common
+    build: {context: ., dockerfile: Dockerfile}
+    user: "1000:1000"
+    init: true
+    stdin_open: true
+    tty: true
+    cpus: ${ORIN_CPUS:-4}
+    mem_limit: 10g
+    environment:
+      ORIN_MACHINE: ${ORIN_MACHINE:-p3768-0000-p3767-0000}
+      GIT_CONFIG_GLOBAL: /home/yocto/orin/gitconfig
+    entrypoint: ["/bin/bash"]
+    command: ["--noprofile", "--norc", "-i"]
+volumes:
+  workspace:
+  downloads:
+  sstate-cache:

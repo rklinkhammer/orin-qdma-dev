@@ -1,0 +1,4 @@
+artifacts/*
+!artifacts/.gitkeep
+validation/*.log
+__pycache__/

@@ -1,0 +1,20 @@
+From: Orin QDMA development <local@example.invalid>
+Subject: [PATCH] build: use supported external-module Kbuild interface
+
+SUBDIRS no longer invokes external module builds in current kernels.
+
+Upstream-Status: Pending
+
+diff --git a/QDMA/linux-kernel/driver/src/Makefile b/QDMA/linux-kernel/driver/src/Makefile
+index e61620e..c77f732 100755
+--- a/QDMA/linux-kernel/driver/src/Makefile
++++ b/QDMA/linux-kernel/driver/src/Makefile
+@@ -139,7 +139,7 @@ bin:
+ ifeq ($(CROSS_COMPILE_FLAG),)
+ 	@$(MAKE) symverfile=$(symverfile) KBUILD_EXTRA_SYMBOLS=$(extra_symb) -C $(KOBJ) M=$(shell pwd) modules
+ else
+-	@$(MAKE) symverfile=$(symverfile) KBUILD_EXTRA_SYMBOLS=$(extra_symb) -C $(KOBJ)  CROSS_COMPILE=$(CROSS_COMPILE_FLAG) SUBDIRS=$(shell pwd) modules
++	@$(MAKE) symverfile=$(symverfile) KBUILD_EXTRA_SYMBOLS=$(extra_symb) -C $(KOBJ)  CROSS_COMPILE=$(CROSS_COMPILE_FLAG) M=$(shell pwd) modules
+ endif
+ 	@cp $(MOD_NAME).ko $(bin_dir)
+ 

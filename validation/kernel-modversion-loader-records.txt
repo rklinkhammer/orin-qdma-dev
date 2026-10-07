@@ -1,0 +1,213 @@
+time="2026-10-07T00:38:50-04:00" level=warning msg="Found orphan containers ([orin-qdma-dev-p3768-0000-p3767-0000-driver-fc6a8e0f1f6a orin-qdma-dev-p3768-0000-p3767-0000-tools-5182eae1d394]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container orin-qdma-dev-shell-run-388f9c7a1b0c Creating 
+ Container orin-qdma-dev-shell-run-388f9c7a1b0c Created 
+// SPDX-License-Identifier: GPL-2.0-or-later
+/*
+ * Module version support
+ *
+ * Copyright (C) 2008 Rusty Russell
+ */
+
+#include <linux/module.h>
+#include <linux/string.h>
+#include <linux/printk.h>
+#include "internal.h"
+
+int check_version(const struct load_info *info,
+		  const char *symname,
+			 struct module *mod,
+			 const s32 *crc)
+{
+	Elf_Shdr *sechdrs = info->sechdrs;
+	unsigned int versindex = info->index.vers;
+	struct modversion_info *versions, *end;
+	u32 crcval;
+
+	/* Exporting module didn't supply crcs?  OK, we're already tainted. */
+	if (!crc)
+		return 1;
+	crcval = *crc;
+
+	/* No versions at all?  modprobe --force does this. */
+	if (versindex == 0)
+		return try_to_force_load(mod, symname) == 0;
+
+	versions = (void *)sechdrs[versindex].sh_addr;
+	end = (void *)versions + sechdrs[versindex].sh_size;
+
+	for (; versions < end && versions->next;
+	       versions = (void *)versions + versions->next) {
+		if (strcmp(versions->name, symname) != 0)
+			continue;
+
+		if (versions->crc == crcval)
+			return 1;
+		pr_debug("Found checksum %X vs module %X\n",
+			 crcval, versions->crc);
+		goto bad_version;
+	}
+
+	/* Broken toolchain. Warn once, then let it go.. */
+	pr_warn_once("%s: no symbol version for %s\n", info->name, symname);
+	return 1;
+
+bad_version:
+	pr_warn("%s: disagrees about version of symbol %s\n", info->name, symname);
+	return 0;
+}
+
+int check_modstruct_version(const struct load_info *info,
+			    struct module *mod)
+{
+	struct find_symbol_arg fsa = {
+		.name	= "module_layout",
+		.gplok	= true,
+	};
+
+	/*
+	 * Since this should be found in kernel (which can't be removed), no
+	 * locking is necessary -- use preempt_disable() to placate lockdep.
+	 */
+	preempt_disable();
+	if (!find_symbol(&fsa)) {
+		preempt_enable();
+		BUG();
+	}
+	preempt_enable();
+	return check_version(info, "module_layout", mod, fsa.crc);
+}
+
+/* First part is kernel version, which we ignore if module has crcs. */
+int same_magic(const char *amagic, const char *bmagic,
+	       bool has_crcs)
+{
+	if (has_crcs) {
+		amagic += strcspn(amagic, " ");
+		bmagic += strcspn(bmagic, " ");
+	}
+	return strcmp(amagic, bmagic) == 0;
+}
+
+/*
+ * Generate the signature for all relevant module structures here.
+ * If these change, we don't want to try to parse the module.
+#include <linux/module.h>
+#define INCLUDE_VERMAGIC
+#include <linux/build-salt.h>
+#include <linux/elfnote-lto.h>
+#include <linux/export-internal.h>
+#include <linux/vermagic.h>
+#include <linux/compiler.h>
+
+#ifdef CONFIG_UNWINDER_ORC
+#include <asm/orc_header.h>
+ORC_HEADER;
+#endif
+
+BUILD_SALT;
+BUILD_LTO_INFO;
+
+MODULE_INFO(vermagic, VERMAGIC_STRING);
+MODULE_INFO(name, KBUILD_MODNAME);
+
+__visible struct module __this_module
+__section(".gnu.linkonce.this_module") = {
+	.name = KBUILD_MODNAME,
+	.init = init_module,
+#ifdef CONFIG_MODULE_UNLOAD
+	.exit = cleanup_module,
+#endif
+	.arch = MODULE_ARCH_INIT,
+};
+
+#ifdef CONFIG_RETPOLINE
+MODULE_INFO(retpoline, "Y");
+#endif
+
+
+
+static const char ____versions[]
+__used __section("__versions") =
+	"\x18\x00\x00\x00\xaf\xf8\xbe\xc0"
+	"pci_save_state\0\0"
+	"\x14\x00\x00\x00\x3b\x4a\x51\xc1"
+	"free_irq\0\0\0\0"
+	"\x1c\x00\x00\x00\x46\xd1\xb8\xa5"
+	"get_user_pages_fast\0"
+	"\x1c\x00\x00\x00\x2b\x2f\xec\xe3"
+	"alloc_chrdev_region\0"
+	"\x1c\x00\x00\x00\x48\x9f\xdb\x88"
+	"__check_object_size\0"
+	"\x14\x00\x00\x00\xd0\x6b\x7d\x9e"
+	"__udelay\0\0\0\0"
+	"\x1c\x00\x00\x00\xa6\x4b\xcf\x79"
+	"flush_dcache_page\0\0\0"
+	"\x18\x00\x00\x00\xed\x25\xcd\x49"
+	"alloc_workqueue\0"
+	"\x18\x00\x00\x00\x5e\x73\x84\xa1"
+	"param_ops_uint\0\0"
+	"\x1c\x00\x00\x00\x15\xa7\xcb\xe9"
+	"pci_msix_vec_count\0\0"
+	"\x1c\x00\x00\x00\xc2\xc9\x65\x97"
+	"pci_enable_device\0\0\0"
+	"\x1c\x00\x00\x00\x20\x06\x0d\xc6"
+	"__num_online_cpus\0\0\0"
+	"\x1c\x00\x00\x00\x8f\x18\x02\x7f"
+	"__msecs_to_jiffies\0\0"
+	"\x1c\x00\x00\x00\xe5\x8f\x43\xf5"
+	"pci_bus_max_busnr\0\0\0"
+	"\x20\x00\x00\x00\xae\xe7\x45\xdd"
+	"pci_enable_device_mem\0\0\0"
+	"\x14\x00\x00\x00\x99\xe7\xe0\x74"
+	"pci_iomap\0\0\0"
+	"\x14\x00\x00\x00\x6e\x4a\x6e\x65"
+	"snprintf\0\0\0\0"
+	"\x18\x00\x00\x00\x36\xf2\xb6\xc5"
+	"queue_work_on\0\0\0"
+	"\x18\x00\x00\x00\x27\x95\xa5\x1b"
+	"__kmalloc_node\0\0"
+	"\x14\x00\x00\x00\xbf\x0f\x54\x92"
+	"finish_wait\0"
+	"\x20\x00\x00\x00\xf2\xad\xe0\x70"
+	"dma_unmap_page_attrs\0\0\0\0"
+	"\x18\x00\x00\x00\x70\x04\x59\x1f"
+	"class_destroy\0\0\0"
+	"\x14\x00\x00\x00\x86\x81\x84\x96"
+	"scnprintf\0\0\0"
+	"\x20\x00\x00\x00\x3c\x16\xaf\x74"
+	"__pci_register_driver\0\0\0"
+	"\x14\x00\x00\x00\x99\xd2\x46\xca"
+	"pci_num_vf\0\0"
+	"\x1c\x00\x00\x00\xf1\xaa\xf1\x6d"
+	"kernel_sigaction\0\0\0\0"
+	"\x1c\x00\x00\x00\x6c\xf2\x6c\x77"
+	"pci_request_regions\0"
+	"\x14\x00\x00\x00\x34\xb5\xb5\x97"
+	"genlmsg_put\0"
+	"\x10\x00\x00\x00\x7e\xa4\x29\x48"
+	"memcpy\0\0"
+	"\x14\x00\x00\x00\xea\x41\x6c\x3b"
+	"kstrtouint\0\0"
+	"\x10\x00\x00\x00\xba\x0c\x7a\x03"
+	"kfree\0\0\0"
+	"\x20\x00\x00\x00\x77\x3e\xe9\xbf"
+	"pci_sriov_get_totalvfs\0\0"
+	"\x18\x00\x00\x00\x55\x48\x0e\xdc"
+	"timer_delete\0\0\0\0"
+	"\x20\x00\x00\x00\x95\xd4\x26\x8c"
+	"prepare_to_wait_event\0\0\0"
+	"\x1c\x00\x00\x00\x6e\x64\xf7\xb3"
+	"kthread_should_stop\0"
+	"\x14\x00\x00\x00\x44\x43\x96\xe2"
+	"__wake_up\0\0\0"
+	"\x1c\x00\x00\x00\x4a\xf1\x3c\xb3"
+	"kmem_cache_create\0\0\0"
+	"\x20\x00\x00\x00\x0b\x05\xdb\x34"
+	"_raw_spin_lock_irqsave\0\0"
+	"\x1c\x00\x00\x00\xe9\xef\x28\x39"
+	"__per_cpu_offset\0\0\0\0"
+	"\x18\x00\x00\x00\x64\xbd\x8f\xba"
+	"_raw_spin_lock\0\0"
+	"\x20\x00\x00\x00\x2f\x8b\xc6\x29"
+	"pci_unregister_driver\0\0\0"
+	"\x18\x00\x00\x00\x8c\x89\xd4\xcb"

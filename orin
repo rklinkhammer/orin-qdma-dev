@@ -1,0 +1,27 @@
+#!/bin/bash
+set -euo pipefail
+cd "$(dirname "$0")"
+dc() { docker --context orbstack compose "$@"; }
+action=${1:-shell}
+export ORIN_MACHINE=${2:-${ORIN_MACHINE:-p3768-0000-p3767-0000}}
+[[ $ORIN_MACHINE =~ ^[a-zA-Z0-9_-]+$ ]] || { echo 'Invalid MACHINE' >&2; exit 2; }
+mkdir -p validation artifacts
+case "$action" in
+  build-container)
+    dc config --quiet
+    dc build --pull shell 2>&1 | tee validation/container-build.log
+    dc run --rm --no-deps -T shell -c 'cat /usr/local/share/orin-qdma-dev/packages.tsv' > artifacts/container-packages.tsv
+    docker --context orbstack image inspect orin-qdma-dev:ubuntu2404-wrynose-r39.2.1 > artifacts/container-image.json ;;
+  init) dc run --rm --no-deps -T init ;;
+  sync|validate)
+    dc run --rm --no-deps -T init
+    dc run --rm --no-deps -T shell /opt/orin-scripts/"$action".sh 2>&1 | tee "validation/$action.log" ;;
+  shell)
+    dc run --rm --no-deps -T init
+    dc run --rm --no-deps shell --noprofile --rcfile /opt/orin-scripts/shell-rc.sh -i ;;
+  check|patch|tools|kernel|driver|focused|export|smoke-tools|smoke-kernel|smoke-driver)
+    dc run --rm --no-deps -T init
+    python3 scripts/run-build.py "$action" "$ORIN_MACHINE" ;;
+  config) dc config ;;
+  *) echo 'Usage: ./orin {build-container|init|sync|validate|shell|check|patch|tools|kernel|driver|focused|export|smoke-tools|smoke-kernel|smoke-driver|config} [MACHINE]' >&2; exit 2 ;;
+esac

@@ -1,0 +1,99 @@
+From: Orin QDMA development <local@example.invalid>
+Subject: [PATCH] apps: honor cross-linker flags and document nanosecond timing
+
+Keep target sysroot and Yocto QA linker flags in every executable.
+
+Upstream-Status: Pending
+
+diff --git a/QDMA/linux-kernel/apps/dma-ctl/Makefile b/QDMA/linux-kernel/apps/dma-ctl/Makefile
+index 1ac7a76..c2b2eb7 100755
+--- a/QDMA/linux-kernel/apps/dma-ctl/Makefile
++++ b/QDMA/linux-kernel/apps/dma-ctl/Makefile
+@@ -29,7 +29,7 @@ endif
+ all: clean dma-ctl
+ 
+ dma-ctl: $(DMA-CTL_OBJS)
+-	$(CC) -pthread -lrt $^ -o $(DMA-CTL) -laio -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE
++	$(CC) $(LDFLAGS) -pthread -lrt $^ -o $(DMA-CTL) -laio -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE
+ 	
+ %.o: %.c
+ 	$(CC) $(CFLAGS) -c -std=c99 -o $@ $< -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE -D_AIO_AIX_SOURCE
+diff --git a/QDMA/linux-kernel/apps/dma-from-device/Makefile b/QDMA/linux-kernel/apps/dma-from-device/Makefile
+index 95e66d2..c3e7ec0 100755
+--- a/QDMA/linux-kernel/apps/dma-from-device/Makefile
++++ b/QDMA/linux-kernel/apps/dma-from-device/Makefile
+@@ -17,7 +17,7 @@ endif
+ all: clean dma-from-device
+ 
+ dma-from-device: $(DMA-FROM-DEVICE_OBJS)
+-	$(CC) -lrt -o $@ $< -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE
++	$(CC) $(LDFLAGS) -lrt -o $@ $< -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE
+ 
+ %.o: %.c
+ 	$(CC) $(CFLAGS) -c -std=c99 -o $@ $< -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE -D_AIO_AIX_SOURCE
+diff --git a/QDMA/linux-kernel/apps/dma-latency/Makefile b/QDMA/linux-kernel/apps/dma-latency/Makefile
+index ffe9bdf..bc716aa 100755
+--- a/QDMA/linux-kernel/apps/dma-latency/Makefile
++++ b/QDMA/linux-kernel/apps/dma-latency/Makefile
+@@ -29,7 +29,7 @@ endif
+ all: clean dma-latency
+ 
+ dma-latency: $(DMA-LAT_OBJS)
+-	$(CC) -pthread -lrt -o $@ $^ -laio -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE
++	$(CC) $(LDFLAGS) -pthread -lrt -o $@ $^ -laio -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE
+ 
+ %.o: %.c
+ 	$(CC) $(CFLAGS) -c -std=c99 -o $@ $< -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE -D_AIO_AIX_SOURCE
+diff --git a/QDMA/linux-kernel/apps/dma-latency/Readme.txt b/QDMA/linux-kernel/apps/dma-latency/Readme.txt
+index eb98223..e4c8e4f 100755
+--- a/QDMA/linux-kernel/apps/dma-latency/Readme.txt
++++ b/QDMA/linux-kernel/apps/dma-latency/Readme.txt
+@@ -18,7 +18,8 @@ The RDTSC timestamp is inserted into the packet that is transmitted in the H2C
+ direction at the time of PIDX update. The timestamp at the time when the 
+ data interrupt is hit is taken and the difference in the timestamps is used to
+ measure the latency for the packet. The tool measures average, maximum and
+-minimum latency in CPU tick counts. To obtain the latency numbers in nanosecs,
++minimum latency in nanoseconds when used with the patched Orin host driver.
++Do not convert these values using CPU frequency. Original upstream instruction:
+ the numbers reported by the tool need to be divided by the nominal CPU freq.
+ 
+ How to use the tool?
+diff --git a/QDMA/linux-kernel/apps/dma-perf/Makefile b/QDMA/linux-kernel/apps/dma-perf/Makefile
+index ff833bb..b56ab58 100755
+--- a/QDMA/linux-kernel/apps/dma-perf/Makefile
++++ b/QDMA/linux-kernel/apps/dma-perf/Makefile
+@@ -29,7 +29,7 @@ endif
+ all: clean dma-perf
+ 
+ dma-perf: $(DMA-PERF_OBJS)
+-	$(CC) -pthread -lrt -o $@ $^ -laio -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE
++	$(CC) $(LDFLAGS) -pthread -lrt -o $@ $^ -laio -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE
+ 
+ %.o: %.c
+ 	$(CC) $(CFLAGS) -c -std=c99 -o $@ $< -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE -D_AIO_AIX_SOURCE
+diff --git a/QDMA/linux-kernel/apps/dma-to-device/Makefile b/QDMA/linux-kernel/apps/dma-to-device/Makefile
+index 5105b71..0778134 100755
+--- a/QDMA/linux-kernel/apps/dma-to-device/Makefile
++++ b/QDMA/linux-kernel/apps/dma-to-device/Makefile
+@@ -29,7 +29,7 @@ endif
+ all: clean dma-to-device
+ 
+ dma-to-device: $(DMA-TO-DEVICE_OBJS)
+-	$(CC) -lrt -o $@ $< -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE
++	$(CC) $(LDFLAGS) -lrt -o $@ $< -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE
+ 
+ %.o: %.c
+ 	$(CC) $(CFLAGS) -c -std=c99 -o $@ $< -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE -D_AIO_AIX_SOURCE
+diff --git a/QDMA/linux-kernel/apps/dma-xfer/Makefile b/QDMA/linux-kernel/apps/dma-xfer/Makefile
+index a8f8606..756a34a 100755
+--- a/QDMA/linux-kernel/apps/dma-xfer/Makefile
++++ b/QDMA/linux-kernel/apps/dma-xfer/Makefile
+@@ -29,7 +29,7 @@ endif
+ all: clean dma-xfer
+ 
+ dma-xfer: $(DMA-XFER_OBJS)
+-	$(CC) -pthread -lrt  $^ -o $(DMA-XFER) -laio -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE
++	$(CC) $(LDFLAGS) -pthread -lrt  $^ -o $(DMA-XFER) -laio -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE
+ 
+ %.o: %.c
+ 	$(CC) $(CFLAGS) -c -std=c99 -o $@ $< -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE -D_AIO_AIX_SOURCE

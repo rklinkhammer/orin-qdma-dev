@@ -1,0 +1,5 @@
+hw.memsize: 68719476736
+hw.ncpu: 16
+Engine=orbstack arch=aarch64 CPU=16 memory_bytes=16818663424
+Filesystem       Size    Used   Avail Capacity iused ifree %iused  Mounted on
+/dev/disk26s1   932Gi   365Gi   567Gi    40%    294k  5.9G    0%   /Volumes/Zeus
