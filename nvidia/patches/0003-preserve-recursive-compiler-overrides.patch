@@ -1,0 +1,32 @@
+From: Orin QDMA integration <orin-qdma-dev@localhost>
+Subject: [PATCH] qdma: preserve escaped recursive make command overrides
+
+MAKEOVERRIDES is an escaped list maintained by GNU make. Applying filter-out
+to it splits compiler commands containing spaces and can absorb following
+LD, AR and CROSS_COMPILE assignments into CC. Yocto KERNEL_CC carries prefix
+mapping flags, so GCC then treats those assignments as input files.
+
+Keep GNU make's original serialization. ARCH is already set with override
+in kernel_check.mk; the Yocto recipe unsets userspace CFLAGS/EXTRA_CFLAGS
+instead of rewriting the command override list.
+
+Upstream-Status: Pending
+---
+--- a/QDMA/linux-kernel/driver/Makefile
++++ b/QDMA/linux-kernel/driver/Makefile
+@@ -136,12 +136,9 @@
+   export EXTRA_FLAGS
+ endif
+ 
+-# Don't allow ARCH to overwrite the modified variable when passed to
+-# the sub-makes.
+-MAKEOVERRIDES := $(filter-out ARCH=%,$(MAKEOVERRIDES))
+-# Don't allow CFLAGS/EXTRA_CFLAGS to clobber definitions in sub-make.
+-MAKEOVERRIDES := $(filter-out CFLAGS=%,$(MAKEOVERRIDES))
+-MAKEOVERRIDES := $(filter-out EXTRA_CFLAGS=%,$(MAKEOVERRIDES))
++# Preserve GNU make's escaping of command-line values containing spaces.
++# ARCH is already an override in kernel_check.mk. The Yocto caller clears
++# userspace CFLAGS/EXTRA_CFLAGS before invoking this kernel build.
+ 
+ # Exports.
+ export grep

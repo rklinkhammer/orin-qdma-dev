@@ -1,0 +1,43 @@
+#!/bin/bash
+set -euo pipefail
+here=$(cd "$(dirname "$0")" && pwd)
+reference=${NVIDIA_REFERENCE:-$HOME/workspace/jetson-nvidia-r39.2.1}
+work=${NVIDIA_WORK:-$here/work}
+image=orin-nvidia-qdma:r39.2.1
+mkdir -p "$work"
+work=$(realpath "$work")
+case ${1:-help} in
+ emulation)
+  exec docker run --rm --privileged "$image" bash -ec '
+    mountpoint -q /proc/sys/fs/binfmt_misc || mount -t binfmt_misc binfmt_misc /proc/sys/fs/binfmt_misc
+    if test -f /proc/sys/fs/binfmt_misc/qemu-aarch64; then
+      grep -q enabled /proc/sys/fs/binfmt_misc/qemu-aarch64
+    else
+      cat /usr/lib/binfmt.d/qemu-aarch64.conf > /proc/sys/fs/binfmt_misc/register
+    fi
+    cat /proc/sys/fs/binfmt_misc/qemu-aarch64' ;;
+
+ container) exec docker build -t "$image" "$here" ;;
+ inspect|build)
+  exec docker run --rm --platform linux/amd64 --user "$(id -u):$(id -g)" \
+   -e QEMU_LD_PREFIX=/reference/Linux_for_Tegra/rootfs \
+   -v "$here:/project:ro" -v "$reference:/reference:ro" -v "$work:/work" \
+   "$image" bash "/project/scripts/$1.sh" ;;
+ prepare)
+  test -f "$work/baseline-complete"
+  exec docker run --rm --platform linux/amd64 -e USER=root \
+   -v "$here:/project:ro" -v "$reference:/reference:ro" -v "$work:/work" \
+   --mount type=bind,src=/dev/null,dst=/work/Linux_for_Tegra/rootfs/dev/null \
+   --mount type=bind,src=/dev/zero,dst=/work/Linux_for_Tegra/rootfs/dev/zero \
+   --mount type=bind,src=/dev/random,dst=/work/Linux_for_Tegra/rootfs/dev/random \
+   --mount type=bind,src=/dev/urandom,dst=/work/Linux_for_Tegra/rootfs/dev/urandom \
+   "$image" bash /project/scripts/prepare.sh ;;
+ fetch|baseline|apply-binaries)
+  # Builds a NEW flash tree; the existing downloaded BSP is always read-only.
+  exec docker run --rm --platform linux/amd64 -e USER=root \
+   -v "$here:/project:ro" -v "$reference:/reference:ro" -v "$work:/work" \
+   "$image" bash "/project/scripts/$1.sh" ;;
+ *) echo 'Usage: nvidia/run {container|emulation|fetch|baseline|apply-binaries|inspect|build|prepare}'
+    echo 'NVIDIA_REFERENCE: downloaded BSP directory; NVIDIA_WORK: writable build/output directory.'
+    exit 2 ;;
+esac

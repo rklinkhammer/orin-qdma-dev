@@ -1,5 +1,9 @@
 # Orin NX QDMA host development
 
+For NVIDIA's reference **Ubuntu/L4T** distribution instead of Yocto, see the
+[new NVIDIA container workflow](nvidia/README.md). The existing workflow below
+continues to build against Yocto/meta-tegra.
+
 Project: `/Volumes/Zeus/workspace/orin-qdma-dev`. This is independent of
 `/Volumes/Zeus/workspace/edf-dev`; no EDF project, image, volume or container is
 modified. The RFSoC/UltraScale endpoint is supplied separately. There are no FPGA,

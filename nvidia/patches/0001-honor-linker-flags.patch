@@ -1,0 +1,142 @@
+From: Orin QDMA development <local@example.invalid>
+Subject: [PATCH] apps: honor linker flags and report monotonic nanosecond timing
+
+Keep target sysroot and Yocto QA flags in every link. Pair these tools with the
+Orin driver timestamp patch; upstream CPU-frequency conversions no longer apply.
+
+Upstream-Status: Pending
+
+diff --git a/QDMA/linux-kernel/apps/dma-ctl/Makefile b/QDMA/linux-kernel/apps/dma-ctl/Makefile
+index 1ac7a76..c2b2eb7 100755
+--- a/QDMA/linux-kernel/apps/dma-ctl/Makefile
++++ b/QDMA/linux-kernel/apps/dma-ctl/Makefile
+@@ -29,7 +29,7 @@ endif
+ all: clean dma-ctl
+ 
+ dma-ctl: $(DMA-CTL_OBJS)
+-	$(CC) -pthread -lrt $^ -o $(DMA-CTL) -laio -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE
++	$(CC) $(LDFLAGS) -pthread -lrt $^ -o $(DMA-CTL) -laio -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE
+ 	
+ %.o: %.c
+ 	$(CC) $(CFLAGS) -c -std=c99 -o $@ $< -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE -D_AIO_AIX_SOURCE
+diff --git a/QDMA/linux-kernel/apps/dma-ctl/main.c b/QDMA/linux-kernel/apps/dma-ctl/main.c
+index a5d75d4..1af768e 100755
+--- a/QDMA/linux-kernel/apps/dma-ctl/main.c
++++ b/QDMA/linux-kernel/apps/dma-ctl/main.c
+@@ -113,9 +113,9 @@ static void dump_dev_stat(struct xcmd_info *xcmd)
+ 	printf("Total MM C2H packets processed = %llu\n", mmc2h_pkts);
+ 	printf("Total ST H2C packets processed = %llu\n", sth2c_pkts);
+ 	printf("Total ST C2H packets processed = %llu\n", stc2h_pkts);
+-	printf("Min Ping Pong Latency = %llu\n", min_ping_pong_lat);
+-	printf("Max Ping Pong Latency = %llu\n", max_ping_pong_lat);
+-	printf("Avg Ping Pong Latency = %llu\n", avg_ping_pong_lat);
++	printf("Min Ping Pong Latency (ns) = %llu\n", min_ping_pong_lat);
++	printf("Max Ping Pong Latency (ns) = %llu\n", max_ping_pong_lat);
++	printf("Avg Ping Pong Latency (ns) = %llu\n", avg_ping_pong_lat);
+ }
+ 
+ static void dump_dev_global_csr(struct xcmd_info *xcmd)
+diff --git a/QDMA/linux-kernel/apps/dma-from-device/Makefile b/QDMA/linux-kernel/apps/dma-from-device/Makefile
+index 95e66d2..c3e7ec0 100755
+--- a/QDMA/linux-kernel/apps/dma-from-device/Makefile
++++ b/QDMA/linux-kernel/apps/dma-from-device/Makefile
+@@ -17,7 +17,7 @@ endif
+ all: clean dma-from-device
+ 
+ dma-from-device: $(DMA-FROM-DEVICE_OBJS)
+-	$(CC) -lrt -o $@ $< -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE
++	$(CC) $(LDFLAGS) -lrt -o $@ $< -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE
+ 
+ %.o: %.c
+ 	$(CC) $(CFLAGS) -c -std=c99 -o $@ $< -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE -D_AIO_AIX_SOURCE
+diff --git a/QDMA/linux-kernel/apps/dma-latency/Makefile b/QDMA/linux-kernel/apps/dma-latency/Makefile
+index ffe9bdf..bc716aa 100755
+--- a/QDMA/linux-kernel/apps/dma-latency/Makefile
++++ b/QDMA/linux-kernel/apps/dma-latency/Makefile
+@@ -29,7 +29,7 @@ endif
+ all: clean dma-latency
+ 
+ dma-latency: $(DMA-LAT_OBJS)
+-	$(CC) -pthread -lrt -o $@ $^ -laio -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE
++	$(CC) $(LDFLAGS) -pthread -lrt -o $@ $^ -laio -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE
+ 
+ %.o: %.c
+ 	$(CC) $(CFLAGS) -c -std=c99 -o $@ $< -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE -D_AIO_AIX_SOURCE
+diff --git a/QDMA/linux-kernel/apps/dma-latency/Readme.txt b/QDMA/linux-kernel/apps/dma-latency/Readme.txt
+index eb98223..7357072 100755
+--- a/QDMA/linux-kernel/apps/dma-latency/Readme.txt
++++ b/QDMA/linux-kernel/apps/dma-latency/Readme.txt
+@@ -14,25 +14,23 @@ What is the dma-lat tool?
+ The intent of the tool is to gather metrics related how much time do packets
+ take to loopback to the host when a packet is transmitted in the ST H2C direction 
+ and the ST Traffic Generator loops back the same packet in the ST C2H direction.
+-The RDTSC timestamp is inserted into the packet that is transmitted in the H2C 
++The monotonic nanosecond timestamp is inserted into the packet that is transmitted in the H2C 
+ direction at the time of PIDX update. The timestamp at the time when the 
+ data interrupt is hit is taken and the difference in the timestamps is used to
+ measure the latency for the packet. The tool measures average, maximum and
+-minimum latency in CPU tick counts. To obtain the latency numbers in nanosecs,
+-the numbers reported by the tool need to be divided by the nominal CPU freq.
++minimum latency in nanoseconds with the patched Orin host driver. Both TX and
++interrupt RX timestamps use ktime_get_ns(). Do not divide results by CPU frequency.
+ 
+ How to use the tool?
+ The tool takes in a configuration file as input which contains data such as the
+ number of queues, packet sizes etc. Please refer to the Sample_dma_latency_config.txt
+ for more information on what are available the configuraion parameters. 
+ The command syntax is -
+-dma-lat -c <config file>
++dma-latency -c <config file>
+ 
+ Important Note-
+-To be able to get correct results for the latency numbers it is necessary that the 
+-number of CPUs be restricted to 1 and hyperthreading be turned OFF from BIOS. This is 
+-to ensure that the CPU core that sends out the H2C packet which contains the timestamp 
+-is the same CPU that receives that data interrupt for the loopback. If this is not done
+-then the packet might get transmitted from one CPU core with a different TSC timestamp, 
+-and the interrupt might get hit on another CPU core which would cause an error in the 
+-measurement. 
++These tools must be paired with the same-revision patched host driver. The
++latency values are nanoseconds rather than upstream x86 TSC cycles. No BIOS
++hyperthreading change or single-core restriction is required for clock consistency.
++Scheduling and interrupt affinity still affect measured latency and require hardware
++validation. The endpoint must echo the packet timestamp unchanged for this test.
+diff --git a/QDMA/linux-kernel/apps/dma-perf/Makefile b/QDMA/linux-kernel/apps/dma-perf/Makefile
+index ff833bb..b56ab58 100755
+--- a/QDMA/linux-kernel/apps/dma-perf/Makefile
++++ b/QDMA/linux-kernel/apps/dma-perf/Makefile
+@@ -29,7 +29,7 @@ endif
+ all: clean dma-perf
+ 
+ dma-perf: $(DMA-PERF_OBJS)
+-	$(CC) -pthread -lrt -o $@ $^ -laio -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE
++	$(CC) $(LDFLAGS) -pthread -lrt -o $@ $^ -laio -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE
+ 
+ %.o: %.c
+ 	$(CC) $(CFLAGS) -c -std=c99 -o $@ $< -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE -D_AIO_AIX_SOURCE
+diff --git a/QDMA/linux-kernel/apps/dma-to-device/Makefile b/QDMA/linux-kernel/apps/dma-to-device/Makefile
+index 5105b71..0778134 100755
+--- a/QDMA/linux-kernel/apps/dma-to-device/Makefile
++++ b/QDMA/linux-kernel/apps/dma-to-device/Makefile
+@@ -29,7 +29,7 @@ endif
+ all: clean dma-to-device
+ 
+ dma-to-device: $(DMA-TO-DEVICE_OBJS)
+-	$(CC) -lrt -o $@ $< -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE
++	$(CC) $(LDFLAGS) -lrt -o $@ $< -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE
+ 
+ %.o: %.c
+ 	$(CC) $(CFLAGS) -c -std=c99 -o $@ $< -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE -D_AIO_AIX_SOURCE
+diff --git a/QDMA/linux-kernel/apps/dma-xfer/Makefile b/QDMA/linux-kernel/apps/dma-xfer/Makefile
+index a8f8606..756a34a 100755
+--- a/QDMA/linux-kernel/apps/dma-xfer/Makefile
++++ b/QDMA/linux-kernel/apps/dma-xfer/Makefile
+@@ -29,7 +29,7 @@ endif
+ all: clean dma-xfer
+ 
+ dma-xfer: $(DMA-XFER_OBJS)
+-	$(CC) -pthread -lrt  $^ -o $(DMA-XFER) -laio -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE
++	$(CC) $(LDFLAGS) -pthread -lrt  $^ -o $(DMA-XFER) -laio -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE
+ 
+ %.o: %.c
+ 	$(CC) $(CFLAGS) -c -std=c99 -o $@ $< -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE -D_AIO_AIX_SOURCE

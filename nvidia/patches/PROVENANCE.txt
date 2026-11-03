@@ -1,0 +1,6 @@
+Copied from jetson-yocto-qdma commit: 71bc3c00456355eb7483eec631fcbbc3a8ec8ba5
+f2269a9c4f62e3a7050ec203cd0b6e151a95ecf468e3214df1e241707604c0cd  nvidia/patches/0001-honor-linker-flags.patch
+80b9deba62f446cf3288f9fd87e27d4d6e8e3bc5a7df04839babd807db178bdd  nvidia/patches/0001-use-monotonic-nanoseconds.patch
+40f9aab6338b39b336b138ad0295de6fd1e81346f8323950b746d80aae6cd0c4  nvidia/patches/0002-supply-create-mode.patch
+bdbad991a782da3a97401096db18aceca6c07b17618a387f65a544f49e22646b  nvidia/patches/0002-use-kbuild-M-for-cross-compilation.patch
+419e67e97266a1a6e313b75401750046aa52cd325b6f963e0bd7426b03cb23de  nvidia/patches/0003-preserve-recursive-compiler-overrides.patch

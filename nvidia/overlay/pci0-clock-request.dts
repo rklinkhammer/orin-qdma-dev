@@ -1,0 +1,14 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+    fragment@0 {
+        // Orin PCIe controller C0, linux,pci-domain = <0>.
+        // This is not necessarily Linux bus 0000:00 or the active QDMA slot.
+        target-path = "/bus@0/pcie@14180000";
+        __overlay__ {
+            // Disable CLKREQ handling for controller C0. Preserve its enable state.
+            nvidia,disable-clock-request;
+        };
+    };
+};
